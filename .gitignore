@@ -1,0 +1,5 @@
+node_modules
+exp
+dist
+boot.bat
+src/logic
