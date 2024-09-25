@@ -3,6 +3,7 @@ import Screen from "./Screen";
 import Demo from "../logic/scenes/Demo";
 import Control from "./utils/Control";
 import EventEmitter from "./utils/EventEmitter";
+import World from "../logic/scenes/World";
 
 export default class Game {
 
@@ -28,20 +29,20 @@ export default class Game {
 
     #tickable: Array<Function> = [];
 
-    #TPS = 20;
+    #TPS = 100;
 
     #lastUpdateTime = 0;
 
     #updateInterval = 1000 / this.#TPS;
 
-    constructor(flags: number = 0) {
+    constructor(flags: number = 0, layers: number = 1) {
         Game.flags = flags;
         this.#instance = this;
         this.#buss = new EventEmitter();
         this.#control = new Control(new URL("../../resources/keybind.json", window.location.href), new EventEmitter());
-        this.#screen = new Screen();
-
-        this.addScene(new Demo(this, "demo"));
+        this.#screen = new Screen(3);
+        
+        this.addScene(new World(this, "demo"));
         this.switchScene("demo");
     }
 

@@ -18,6 +18,18 @@ export default class Vector2 {
         return this.#y;
     }
 
+    #mod(a: number, b: number) {
+       return ((a % b) + b) % b;
+    }
+
+    getModX(divisor: number): number {
+        return ((this.#x % divisor) + divisor) % divisor;
+    }
+
+    getModY(divisor: number): number {
+        return ((this.#y % divisor) + divisor) % divisor;
+    }
+
     getFloorX(): number {
         return Math.floor(this.#x);
     }

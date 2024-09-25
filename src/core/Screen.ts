@@ -1,38 +1,45 @@
 import Camera from "./Camera.ts";
 import Game from "./Game.ts";
+import Layer from "./Layer";
 
 export default class Screen {
 
-    #canvas: HTMLCanvasElement;
+    #width: number;
 
-    #ctx: CanvasRenderingContext2D;
+    #height: number;
+
+    #layers: Layer[] = [];
 
     #camera: Camera;
 
     #lastTime: number = performance.now();
-    
+
     #frame: number = 0;
 
     #fps: number = 0;
-    
+
     #fpsInterval: number = 1000;
-    
+
     #startTime: number = this.#lastTime;
 
     scale_multiply = 1.5;
 
     scale: number = 10;
 
-    constructor(width: number = 400, height: number = 400) {
-        this.#canvas = this.createCanvas(width, height);
-        this.#ctx = this.#canvas.getContext("2d") ?? (() => { throw new Error("Не удалось получить 2d context"); })();
-        this.#camera = new Camera(this.getSize().width, this.getSize().height);
-        
+    constructor(layers: number, width: number = 700, height: number = 700) {
+        this.#width = width;
+        this.#height = height;
+        this.#camera = new Camera(this.#width, this.#height);
+
+        for (let i = 0; i < layers; i++) {
+            this.#layers.push(new Layer(i));
+        }
         if (Game.flags & Game.Flag.AUTO_RESIZE) {
             window.addEventListener("resize", this.resize.bind(this));
-            this.resize();
         }
-        this.#ctx.imageSmoothingEnabled = false;
+        this.resize();
+        console.log(this.#layers);
+
     }
 
     getFps(): number {
@@ -43,53 +50,66 @@ export default class Screen {
         return this.#camera;
     }
 
-    getSize(): { width: number, height: number } {
-        return { width: this.#canvas.width, height: this.#canvas.height }
-    }
-
     setSize(width: number, height: number) {
-        this.#canvas.width = width;
-        this.#canvas.height = height;
+        this.#width = width;
+        this.#height = height;
     }
 
-    getCtx(): CanvasRenderingContext2D {
-        return this.#ctx;
-    }
-
-    fillAll(color: string = "white") {
-        this.#ctx.fillStyle = color;
-        this.#ctx.fillRect(0, 0, this.#canvas.width, this.#canvas.width);
+    getLayer(index: number = 0): Layer {
+        if (index > this.#layers.length || index < 0) throw new Error("Некорректный индекс");
+        return this.#layers[index];
     }
 
     getWidth(): number {
-        return this.#canvas.width;
+        return this.#width;
     }
 
     getHeight(): number {
-        return this.#canvas.height;
+        return this.#height;
     }
 
-    resize(): void {
-        this.#canvas.width = window.innerWidth;
-        this.#canvas.height = window.innerHeight;
-        this.#camera.setSize(this.#canvas.width, this.#canvas.height);
+    resize(): void { // воркать
+        this.#layers.forEach((layer) => {
+            const canvas = layer.getCanvas();
+            // canvas.width = window.innerWidth;
+            // canvas.height = window.innerHeight;
+            const ratio = window.devicePixelRatio;
 
-        const originalWidth = (16 * 32 * 5) / 1.5;
-        const originalHeight = (16 * 32 * 3) / 1.5;
+            canvas.width = window.innerWidth * ratio;
+            canvas.height = window.innerHeight * ratio;
+            canvas.style.width = window.innerWidth + "px";
+            canvas.style.height = window.innerHeight + "px";
 
-        this.scale = Math.min(this.#canvas.width / originalWidth, this.#canvas.height / originalHeight) * this.scale_multiply;
-    }
+            layer.getContext().scale(ratio, ratio);
 
-    print(x: number, y: number, text: string, color: string) {
-        this.#ctx.fillStyle = color;
-        this.#ctx.font = "22px Inter";
-        this.#ctx.fillText(text, x, y);
+            // canvas.width = window.innerWidth * dpi;
+            // canvas.height = window.innerHeight * dpi;
+            // canvas.style.width = window.innerWidth + 'px';
+            // canvas.style.height = window.innerHeight + 'px';
+            
+            
+            // const dpi = window.devicePixelRatio;
+            const baseWidth = 1080; // Базовый размер canvas
+            const baseHeight = 1920;
+            
+            // const scaleX = Math.round(canvas.width / 1080); // 1000 - это базовый размер canvas
+            // const scaleY = Math.round(canvas.height / 1920);
+            // const scaleX = Math.round((canvas.width * ratio) / baseWidth);
+            // const scaleY = Math.round((canvas.height * ratio) / baseHeight);
+        
+            // layer.getContext().scale(scaleX, scaleY);
+            // layer.getContext().save();
+            // layer.getContext().scale(scaleX, scaleY);
+        });
+        this.#camera.setSize(window.innerWidth, window.innerHeight);
+        this.setSize(window.innerWidth, window.innerHeight);
+
     }
 
     createCanvas(width: number, height: number): HTMLCanvasElement {
         let element: HTMLCanvasElement = document.createElement("canvas");
         element.width = width;
-        element.height = height; 
+        element.height = height;
         (document.getElementById("canvas") ?? (() => { throw new Error("Корневой элемент не найден"); })()).appendChild(element);
         if (Game.flags & Game.Flag.DEBUG) console.log("Canvas creating..");
         return element;
@@ -107,5 +127,4 @@ export default class Screen {
             this.#startTime = time;
         }
     }
-            
 }

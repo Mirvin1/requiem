@@ -1,19 +1,19 @@
 import Game from "./src/core/Game.ts";
-import Sprite from "./src/core/Sprite";
+import Sprite from "./src/core/renderable/Sprite";
 import Vector2 from "./src/core/utils/Vector2";
 
 window.onload = () => {
     const game = new Game(Game.Flag.DEBUG | Game.Flag.AUTO_RESIZE);
     game.start();
 
-    let keysPressed: Record<string, boolean> = { };
+    let keysPressed: Record<string, boolean> = {};
 
-    document.addEventListener('keydown', function(event) {
+    document.addEventListener('keydown', function (event) {
         const key = event.code;
         keysPressed[key] = true;
     });
 
-    document.addEventListener('keyup', function(event) {
+    document.addEventListener('keyup', function (event) {
         const key = event.code;
         keysPressed[key] = false;
     });
@@ -21,14 +21,12 @@ window.onload = () => {
     game.addTickable(updatePosition);
 
     function updatePosition(): void {
-        const step = 1;
-        const step2 = 1;
+        const step = 3;
+        const step2 = 3;
 
         let cameraX: number = game.getScreen().getCamera().getPosition().getX();
-        
-        let cameraY: number = game.getScreen().getCamera().getPosition().getY(); 
 
-        const sprite: Sprite = game.getScene("demo").getSprites().entries().next().value[0];
+        let cameraY: number = game.getScreen().getCamera().getPosition().getY();
 
         if (keysPressed['KeyW'] && keysPressed['KeyD']) {
             cameraY += step2;
@@ -51,6 +49,6 @@ window.onload = () => {
         } else if (keysPressed['KeyD']) {
             cameraX += step;
         }
-        game.getScreen().getCamera().setPosition(new Vector2(cameraX, cameraY)); 
+        game.getScreen().getCamera().setPosition(new Vector2(cameraX, cameraY));
     }
 };

@@ -25,7 +25,26 @@ export default class Control {
         this.#src = src;
         this.#buss = buss;
 
+        this.setup();
         this.reload();
+    }
+
+    setup(): void {
+        document.addEventListener('mousedown', function(event) {
+            if (event.button === 0) {
+                event.preventDefault();
+            }
+        }, false);
+    
+        document.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+        }, false);
+    
+        document.addEventListener('mousedown', function(event) {
+            if (event.button === 1) {
+                event.preventDefault();
+            }
+        }, false);
     }
 
     async reload() {
